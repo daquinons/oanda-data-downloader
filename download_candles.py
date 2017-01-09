@@ -62,7 +62,7 @@ duration = {
 @click.command()
 @click.option(
     "--oanda-token",
-    default="885ac2b8ad30d2292610ecb707431155-32bf7c56bb3db61696674160b00fa68c",
+    default="ADD YOUR TOKEN HERE",
     help="access token for the oanda fxpractice api"
 )
 @click.option("--instrument", default="EUR_USD",
