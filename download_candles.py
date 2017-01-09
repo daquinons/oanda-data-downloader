@@ -4,9 +4,9 @@ chaining multiple requests."""
 import datetime
 import time
 import requests
+import pandas
 import json
 import sys
-
 import click
 
 # http://developer.oanda.com/rest-live/rates/#retrieveInstrumentHistory
@@ -67,15 +67,19 @@ duration = {
 )
 @click.option("--instrument", default="EUR_USD",
               help="request candles for this instrument")
-@click.option("--granularity", type=click.Choice(granularities), default="M5")
-@click.option("--begin", type=int, default=2013)
+@click.option("--granularity", type=click.Choice(granularities), default="H1")
+@click.option("--begin", type=int, default=2014)
 @click.option("--end", type=int, default=2015)
-def download_candles(oanda_token, instrument, granularity, begin, end):
+@click.option("--path", type=click.Path(), default=None)
+def download_candles(oanda_token, instrument, granularity, begin, end, path=None):
     """
 
     :oanda_token: a valid fxpractice token
     :instrument: an oanda instrument e.g. EUR_USD
     :granularity: http://developer.oanda.com/rest-live/rates/#retrieveInstrumentHistory
+    :begin: a year
+    :end: a year
+    :path: the complete path for the csv file to be saved
 
     """
 
@@ -89,18 +93,45 @@ def download_candles(oanda_token, instrument, granularity, begin, end):
     }
     current = start
     delta = 4500 * duration[granularity]
-    candles = []
+    data_columns = ["open_ask", "close_ask", "high_ask", "low_ask", "open_bid", "close_bid", "high_bid", "low_bid", "volume"]
+    data = pandas.DataFrame(columns=data_columns)
     while current < end:
         params["start"] = current.isoformat()
         params["end"] = (current + delta).isoformat()
+        print("Requesting data from", params["start"], file=sys.stderr)
         response = requests.get(url, params=params, headers=headers)
         try:
-            candle = response.json()["candles"]
-            print(candle[0]["time"], file=sys.stderr)
-            candles.extend(candle)
-            time.sleep(0.5)
+            candles = response.json()["candles"]
+            for candle in candles:
+                date_time = candle["time"]
+                open_ask = candle["openAsk"]
+                close_ask = candle["closeAsk"]
+                high_ask = candle["highAsk"]
+                low_ask = candle["lowAsk"]
+                open_bid = candle["openBid"]
+                close_bid = candle["closeBid"]
+                high_bid = candle["highBid"]
+                low_bid = candle["lowBid"]
+                volume = candle["volume"]
+                data_line = pandas.DataFrame({
+                                            "open_ask": [open_ask],
+                                            "close_ask": [close_ask],
+                                            "high_ask": [high_ask],
+                                            "low_ask": [low_ask],
+                                            "open_bid": [open_bid],
+                                            "close_bid": [close_bid],
+                                            "high_bid": [high_bid],
+                                            "low_bid": [low_bid],
+                                            "volume": [volume]
+                                            }, index=[pandas.to_datetime([date_time])])
+                data = data.append(data_line)
             current += delta
+            time.sleep(0.5)
         except KeyError:
             print(response.json(), file=sys.stderr)
             break
-    print(json.dumps(candles))
+    data.index.name = "datetime"
+    if path is None:
+        path = "./" + instrument + "_" + granularity + ".csv"
+    data.to_csv(path)
+    print("Saved to", path)
