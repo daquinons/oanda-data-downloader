@@ -1,9 +1,9 @@
-# oanda-downloads
-download data by chaining 5000 candles at a time
+# Oanda Data Downloader
+Download data from Oanda in csv format
 
 ## Download
 
-`git clone git@github.com:daquinons/oanda-downloads.git`
+`git clone git@github.com:daquinons/oanda-data-downloader.git`
 
 ## Install
 
