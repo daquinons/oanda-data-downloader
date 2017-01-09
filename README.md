@@ -3,7 +3,7 @@ download data by chaining 5000 candles at a time
 
 ## Download
 
-`git clone git@github.com:galilean-traders/oanda-downloads.git`
+`git clone git@github.com:daquinons/oanda-downloads.git`
 
 ## Install
 
@@ -11,5 +11,5 @@ download data by chaining 5000 candles at a time
 
 ## Run
 
-example: `download_candles --instrument USD_JPY`
+example: `download_candles --instrument USD_JPY --granularity D --begin 2012 --end 2013`
 you can get help with `download_candles --help`
