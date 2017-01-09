@@ -70,7 +70,7 @@ duration = {
 @click.option("--granularity", type=click.Choice(granularities), default="H1")
 @click.option("--begin", type=int, default=2014)
 @click.option("--end", type=int, default=2015)
-@click.option("--path", type=click.Path(), default=None)
+@click.option("--path", type=click.Path(), default=None, help="Optional: set the place where the csv will be stored and its name. Ex: './EURUSD_1H.csv'")
 def download_candles(oanda_token, instrument, granularity, begin, end, path=None):
     """
 

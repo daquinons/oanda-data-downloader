@@ -11,5 +11,5 @@ download data by chaining 5000 candles at a time
 
 ## Run
 
-example: `download_candles > eur_usd_m5.json`
+example: `download_candles --instrument USD_JPY`
 you can get help with `download_candles --help`
