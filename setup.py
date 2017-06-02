@@ -9,8 +9,7 @@ setup(
         'requests',
         'pandas'
     ],
-    entry_points='''
-        [console_scripts]
-        download_candles=download_candles:download_candles
-    ''',
+    entry_points={'console_scripts': [
+    'download_candles=download_candles:download_candles'
+    ]},
 )
