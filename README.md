@@ -1,5 +1,5 @@
 # Oanda Data Downloader
-Download data from Oanda in csv format
+Download data from Oanda in csv format using Python 3.
 
 ## Download
 
