@@ -58,31 +58,7 @@ duration = {
     "W": datetime.timedelta(weeks=1),
 }
 
-
-@click.command()
-@click.option(
-    "--oanda-token",
-    default="ADD YOUR TOKEN HERE",
-    help="access token for the oanda fxpractice api"
-)
-@click.option("--instrument", default="EUR_USD",
-              help="request candles for this instrument")
-@click.option("--granularity", type=click.Choice(granularities), default="H1")
-@click.option("--begin", type=int, default=2014)
-@click.option("--end", type=int, default=2015)
-@click.option("--path", type=click.Path(), default=None, help="Optional: set the place where the csv will be stored and its name. Ex: './EURUSD_1H.csv'")
-def download_candles(oanda_token, instrument, granularity, begin, end, path=None):
-    """
-
-    :oanda_token: a valid fxpractice token
-    :instrument: an oanda instrument e.g. EUR_USD
-    :granularity: http://developer.oanda.com/rest-live/rates/#retrieveInstrumentHistory
-    :begin: a year
-    :end: a year
-    :path: the complete path for the csv file to be saved
-
-    """
-
+def get_data_candles(oanda_token, instrument, granularity, begin, end):
     url = "https://api-fxpractice.oanda.com/v1/candles"
     start = datetime.datetime(begin, 1, 1)
     end = datetime.datetime(end - 1, 12, 31, 23, 59, 59)
@@ -131,6 +107,34 @@ def download_candles(oanda_token, instrument, granularity, begin, end, path=None
             print(response.json(), file=sys.stderr)
             break
     data.index.name = "datetime"
+
+    return data
+
+@click.command()
+@click.option(
+    "--oanda-token",
+    default="ADD YOUR TOKEN HERE",
+    help="access token for the oanda fxpractice api"
+)
+@click.option("--instrument", default="EUR_USD",
+              help="request candles for this instrument")
+@click.option("--granularity", type=click.Choice(granularities), default="H1")
+@click.option("--begin", type=int, default=2014)
+@click.option("--end", type=int, default=2015)
+@click.option("--path", type=click.Path(), default=None, help="Optional: set the place where the csv will be stored and its name. Ex: './EURUSD_1H.csv'")
+def download_candles(oanda_token, instrument, granularity, begin, end, path=None):
+    """
+
+    :oanda_token: a valid fxpractice token
+    :instrument: an oanda instrument e.g. EUR_USD
+    :granularity: http://developer.oanda.com/rest-live/rates/#retrieveInstrumentHistory
+    :begin: a year
+    :end: a year
+    :path: the complete path for the csv file to be saved
+
+    """
+    data = get_data_candles(oanda_token, instrument, granularity, begin, end)
+
     if path is None:
         path = "./" + instrument + "_" + granularity + ".csv"
     data.to_csv(path)
