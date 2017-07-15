@@ -77,30 +77,34 @@ def get_data_candles(oanda_token, instrument, granularity, begin, end):
         print("Requesting data from", params["start"], file=sys.stderr)
         response = requests.get(url, params=params, headers=headers)
         try:
-            candles = response.json()["candles"]
-            for candle in candles:
-                date_time = candle["time"]
-                open_ask = candle["openAsk"]
-                close_ask = candle["closeAsk"]
-                high_ask = candle["highAsk"]
-                low_ask = candle["lowAsk"]
-                open_bid = candle["openBid"]
-                close_bid = candle["closeBid"]
-                high_bid = candle["highBid"]
-                low_bid = candle["lowBid"]
-                volume = candle["volume"]
-                data_line = pandas.DataFrame({
-                                            "open_ask": [open_ask],
-                                            "close_ask": [close_ask],
-                                            "high_ask": [high_ask],
-                                            "low_ask": [low_ask],
-                                            "open_bid": [open_bid],
-                                            "close_bid": [close_bid],
-                                            "high_bid": [high_bid],
-                                            "low_bid": [low_bid],
-                                            "volume": [volume]
-                                            }, index=[pandas.to_datetime([date_time])])
-                data = data.append(data_line)
+            if response.status_code == 200:
+                candles = response.json()["candles"]
+                for candle in candles:
+                    date_time = candle["time"]
+                    open_ask = candle["openAsk"]
+                    close_ask = candle["closeAsk"]
+                    high_ask = candle["highAsk"]
+                    low_ask = candle["lowAsk"]
+                    open_bid = candle["openBid"]
+                    close_bid = candle["closeBid"]
+                    high_bid = candle["highBid"]
+                    low_bid = candle["lowBid"]
+                    volume = candle["volume"]
+                    data_line = pandas.DataFrame({
+                                                "open_ask": [open_ask],
+                                                "close_ask": [close_ask],
+                                                "high_ask": [high_ask],
+                                                "low_ask": [low_ask],
+                                                "open_bid": [open_bid],
+                                                "close_bid": [close_bid],
+                                                "high_bid": [high_bid],
+                                                "low_bid": [low_bid],
+                                                "volume": [volume]
+                                                }, index=[pandas.to_datetime([date_time])])
+                    data = data.append(data_line)
+            else:
+                print("Error: Response code", response.status_code)
+
             current += delta
             time.sleep(0.5)
         except KeyError:
