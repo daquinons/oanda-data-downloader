@@ -75,11 +75,13 @@ def get_data_candles(oanda_token, instrument, granularity, begin, end):
         params["start"] = current.isoformat()
         params["end"] = (current + delta).isoformat()
         print("Requesting data from", params["start"], file=sys.stderr)
-        response = requests.get(url, params=params, headers=headers)
         try:
-            if response.status_code == 200:
-                candles = response.json()["candles"]
-                for candle in candles:
+            response = requests.get(url, params=params, headers=headers)
+            if response.status_code is not 200:
+                raise requests.exceptions.HTTPError(response.status_code)
+            candles = response.json()["candles"]
+            for candle in candles:
+                try:
                     date_time = candle["time"]
                     open_ask = candle["openAsk"]
                     close_ask = candle["closeAsk"]
@@ -102,14 +104,17 @@ def get_data_candles(oanda_token, instrument, granularity, begin, end):
                                                 "volume": [volume]
                                                 }, index=[pandas.to_datetime([date_time])])
                     data = data.append(data_line)
-            else:
-                print("Error: Response code", response.status_code)
 
-            current += delta
-            time.sleep(0.5)
-        except KeyError:
-            print(response.json(), file=sys.stderr)
-            break
+                except KeyError:
+                    print(response.json(), file=sys.stderr)
+                    break
+        except requests.exceptions.HTTPError as e:
+            print("Status code:", e)
+
+
+        current += delta
+        time.sleep(0.5)
+
     data.index.name = "datetime"
 
     return data
